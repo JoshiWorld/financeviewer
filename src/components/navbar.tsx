@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ToggleTheme } from "./ui/toggle-theme";
 import { type Session } from "next-auth";
+import { UserDropdown } from "./user-dropdown";
 
 export function Navbar() {
     return (
@@ -44,9 +45,7 @@ export function NavbarLoggedIn({ session }: { session: Session }) {
         </Link>
       </div>
       <div className="m-2 flex flex-none items-center justify-between px-4 py-2 text-center">
-        <Link href="user" className="mr-4 font-semibold">
-          {session.user.name}
-        </Link>
+        <UserDropdown username={session.user.name} />
         <ToggleTheme />
       </div>
     </div>
