@@ -1,24 +1,10 @@
+import { OverviewChart } from "@/components/overview-chart";
 import { getServerAuthSession } from "@/server/auth";
-import { api, HydrateClient } from "@/trpc/server";
-import { Navbar, NavbarLoggedIn } from "@/components/navbar";
-import { FinanceTable } from "./_components/finance-table";
 
 export default async function Home() {
   const session = await getServerAuthSession();
 
-  if(session?.user) void api.finance.getAll.prefetch();
-
-  return (
-    <HydrateClient>
-      {session?.user ? <NavbarLoggedIn session={session} /> : <Navbar />}
-
-      <main className="flex min-h-screen flex-col items-center bg-background">
-        <div className="container flex flex-col items-center justify-center gap-12 px-20 py-16">
-          {session?.user && <FinanceTable />}
-        </div>
-      </main>
-    </HydrateClient>
-  );
+  return <div>{session?.user && <OverviewChart userId={session.user.id} />}</div>;
 }
 
 {/* <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">

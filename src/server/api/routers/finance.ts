@@ -30,13 +30,15 @@ export const financeRouter = createTRPCRouter({
       });
     }),
 
-  get: protectedProcedure.input(z.object({id: z.string()})).query(async ({ ctx, input }) => {
-    const finance = await ctx.db.finance.findUnique({
-      where: { createdBy: { id: ctx.session.user.id }, id: input.id },
-    });
+  get: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const finance = await ctx.db.finance.findUnique({
+        where: { createdBy: { id: ctx.session.user.id }, id: input.id },
+      });
 
-    return finance ?? null;
-  }),
+      return finance ?? null;
+    }),
 
   update: protectedProcedure
     .input(
@@ -129,5 +131,71 @@ export const financeRouter = createTRPCRouter({
         const dayB = new Date(b.paymentDate).getDate();
         return dayA - dayB;
       });
+    }),
+
+  overview: protectedProcedure
+    .query(async ({ ctx }) => {
+      const finances = await ctx.db.finance.findMany({
+        where: {
+          createdBy: { id: ctx.session.user.id },
+        },
+      });
+
+      const monthlyExpenses = {
+        januar: 0,
+        februar: 0,
+        märz: 0,
+        april: 0,
+        mai: 0,
+        juni: 0,
+        juli: 0,
+        august: 0,
+        september: 0,
+        oktober: 0,
+        november: 0,
+        dezember: 0,
+      };
+
+      finances.forEach((finance) => {
+        const paymentDate = new Date(finance.paymentDate);
+        const paymentMonth = paymentDate.getMonth();
+
+        switch (finance.type) {
+          case PaymentType.MONTHLY:
+            Object.keys(monthlyExpenses).forEach((month) => {
+              monthlyExpenses[month] += finance.amount;
+            });
+            break;
+
+          case PaymentType.QUARTER:
+            Object.keys(monthlyExpenses).forEach((month, index) => {
+              if (index % 3 === paymentMonth % 3) {
+                monthlyExpenses[month] += finance.amount;
+              }
+            });
+            break;
+
+          case PaymentType.HALF:
+            Object.keys(monthlyExpenses).forEach((month, index) => {
+              if (index % 6 === paymentMonth % 6) {
+                monthlyExpenses[month] += finance.amount;
+              }
+            });
+            break;
+
+          case PaymentType.YEARLY:
+            Object.keys(monthlyExpenses).forEach((month, index) => {
+              if (index === paymentMonth) {
+                monthlyExpenses[month] += finance.amount;
+              }
+            });
+            break;
+
+          default:
+            break;
+        }
+      });
+
+      return monthlyExpenses;
     }),
 });

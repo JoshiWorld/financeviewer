@@ -9,6 +9,9 @@ import { type Metadata } from "next";
 import { TRPCReactProvider } from "@/trpc/react";
 
 import { cn } from "@/lib/utils";
+import { api, HydrateClient } from "@/trpc/server";
+import { getServerAuthSession } from "@/server/auth";
+import { Navbar, NavbarLoggedIn } from "@/components/navbar";
 
 export const metadata: Metadata = {
   title: "FinanceViewer",
@@ -21,9 +24,13 @@ const fontSans = FontSans({
   variable: "--font-sans",
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const session = await getServerAuthSession();
+
+  if (session?.user) void api.finance.getAll.prefetch();
+
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body
@@ -39,7 +46,18 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <HydrateClient>
+              {session?.user ? (
+                <NavbarLoggedIn session={session} />
+              ) : (
+                <Navbar />
+              )}
+              <main className="flex min-h-screen flex-col items-center bg-background">
+                <div className="container flex flex-col items-center justify-center gap-12 px-20 py-16">
+                  {children}
+                </div>
+              </main>
+            </HydrateClient>
             <Toaster />
           </ThemeProvider>
         </TRPCReactProvider>
