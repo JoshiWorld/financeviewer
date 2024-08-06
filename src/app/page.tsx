@@ -12,7 +12,7 @@ export default async function Home() {
     <HydrateClient>
       {session?.user ? <NavbarLoggedIn session={session} /> : <Navbar />}
 
-      <main className="mt-10 flex min-h-screen flex-col items-center bg-background">
+      <main className="flex min-h-screen flex-col items-center bg-background">
         <div className="container flex flex-col items-center justify-center gap-12 px-20 py-16">
           {session?.user && <FinanceTable />}
         </div>
