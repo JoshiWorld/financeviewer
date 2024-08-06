@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ToggleTheme } from "./ui/toggle-theme";
 import { type Session } from "next-auth";
 import { UserDropdown } from "./user-dropdown";
+import { usePathname } from "next/navigation";
 
 export function Navbar() {
     return (
@@ -32,6 +33,8 @@ export function Navbar() {
 }
 
 export function NavbarLoggedIn({ session }: { session: Session }) {
+  const path = usePathname();
+
   return (
     <div className="flex items-center justify-center border-b-2 bg-background">
       <div className="m-2 flex-none px-4 py-2 text-center">
@@ -42,19 +45,19 @@ export function NavbarLoggedIn({ session }: { session: Session }) {
       <div className="m-2 flex-grow px-4 py-2 text-center">
         <Link
           href="/"
-          className="border-b-2 border-primary font-semibold"
+          className={`font-semibold ${path === "/" ? "border-b-2 border-primary" : ""}`}
         >
           Übersicht
         </Link>
         <Link
           href="/ausgaben"
-          className="ml-5 border-b-2 border-primary font-semibold"
+          className={`ml-5 font-semibold ${path === "/ausgaben" ? "border-b-2 border-primary" : ""}`}
         >
           Ausgaben
         </Link>
         <Link
           href="/einnahmen"
-          className="ml-5 border-b-2 border-primary font-semibold"
+          className={`ml-5 font-semibold ${path === "/einnahmen" ? "border-b-2 border-primary" : ""}`}
         >
           Einnahmen
         </Link>
