@@ -53,6 +53,15 @@ export function EditFinance({ financeId, isOpen, onClose }: EditFinanceProps) {
       });
     },
   });
+  const deleteFinance = api.finance.delete.useMutation({
+    onSuccess: () => {
+      onClose();
+      toast({
+        variant: "destructive",
+        description: "Der Eintrag wurde erfolgreich gelöscht",
+      });
+    },
+  });
 
   const [title, setTitle] = useState<string>("");
   const [paymentType, setPaymentType] = useState<PaymentType>(
@@ -185,7 +194,19 @@ export function EditFinance({ financeId, isOpen, onClose }: EditFinanceProps) {
             </div>
           )
         )}
-        <DialogFooter>
+        <DialogFooter className="flex justify-between">
+          <Button
+            type="submit"
+            variant="destructive"
+            disabled={deleteFinance.isPending}
+            onClick={() =>
+              deleteFinance.mutate({
+                id: financeId,
+              })
+            }
+          >
+            {editFinance.isPending ? "Wird gelöscht.." : "Löschen"}
+          </Button>
           <Button
             type="submit"
             disabled={editFinance.isPending}
