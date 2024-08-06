@@ -1,6 +1,5 @@
 "use client";
 
-// @ts-expect-error || @ts-ignore
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
 import {
@@ -84,12 +83,10 @@ export function OverviewChart({ userId }: { userId: string }) {
             tickLine={false}
             tickMargin={10}
             axisLine={false}
-            // @ts-expect-error || value always the same
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-            tickFormatter={(value) => value.slice(0, 3)}
+            tickFormatter={(value: string) => value.slice(0, 3)}
           />
           <ChartTooltip content={<ChartTooltipContent />} />
-          {/* @ts-expect-error || passt so */}
           <ChartLegend content={<ChartLegendContent />} />
           <Bar dataKey="einnahmen" fill="var(--color-einnahmen)" radius={4} />
           <Bar dataKey="ausgaben" fill="var(--color-ausgaben)" radius={4} />

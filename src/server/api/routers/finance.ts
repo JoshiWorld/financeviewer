@@ -163,6 +163,7 @@ export const financeRouter = createTRPCRouter({
         switch (finance.type) {
           case PaymentType.MONTHLY:
             Object.keys(monthlyExpenses).forEach((month) => {
+              // @ts-expect-error || @ts-ignore
               monthlyExpenses[month] += finance.amount;
             });
             break;
@@ -170,6 +171,7 @@ export const financeRouter = createTRPCRouter({
           case PaymentType.QUARTER:
             Object.keys(monthlyExpenses).forEach((month, index) => {
               if (index % 3 === paymentMonth % 3) {
+                // @ts-expect-error || @ts-ignore
                 monthlyExpenses[month] += finance.amount;
               }
             });
@@ -178,6 +180,7 @@ export const financeRouter = createTRPCRouter({
           case PaymentType.HALF:
             Object.keys(monthlyExpenses).forEach((month, index) => {
               if (index % 6 === paymentMonth % 6) {
+                // @ts-expect-error || @ts-ignore
                 monthlyExpenses[month] += finance.amount;
               }
             });
@@ -186,6 +189,7 @@ export const financeRouter = createTRPCRouter({
           case PaymentType.YEARLY:
             Object.keys(monthlyExpenses).forEach((month, index) => {
               if (index === paymentMonth) {
+                // @ts-expect-error || @ts-ignore
                 monthlyExpenses[month] += finance.amount;
               }
             });
