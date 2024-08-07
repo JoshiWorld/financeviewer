@@ -16,7 +16,7 @@ export function Navbar() {
           </h3>
         </div>
         <div className="m-2 flex-grow px-4 py-2 text-center">
-          <Link href="test" className="border-b-2 border-primary font-semibold">
+          <Link href="/" className="border-b-2 border-primary font-semibold">
             Finanzen
           </Link>
         </div>
@@ -87,7 +87,10 @@ export function NavbarLoggedIn({ session }: { session: Session }) {
           </Link>
         </div>
         <div className="hidden md:flex md:items-center md:space-x-4">
-          <UserDropdown username={session.user.name} />
+          <UserDropdown
+            username={session.user.name}
+            image={session.user.image}
+          />
           <ToggleTheme />
         </div>
       </div>
@@ -111,7 +114,10 @@ export function NavbarLoggedIn({ session }: { session: Session }) {
           >
             Einnahmen
           </Link>
-          <UserDropdown username={session.user.name} />
+          <UserDropdown
+            username={session.user.name}
+            image={session.user.image}
+          />
           <ToggleTheme />
         </div>
       )}

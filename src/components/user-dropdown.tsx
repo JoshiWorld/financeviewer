@@ -16,15 +16,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export function UserDropdown({ username }: { username: string | null | undefined }) {
+export function UserDropdown({ username, image }: { username: string | null | undefined, image: string | null | undefined }) {
+  const path = usePathname();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <h1 className="mr-4 cursor-pointer font-semibold">{username}</h1>
+        {/* <h1 className="mr-4 cursor-pointer font-semibold">{username}</h1> */}
+        <Avatar
+          className={`cursor-pointer ${path === "/settings" ? "border-2 border-primary" : ""}`}
+        >
+          {/* @ts-expect-error || @ts-ignore */}
+          <AvatarImage src={image} />
+          <AvatarFallback>PB</AvatarFallback>
+        </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>Mein Account</DropdownMenuLabel>
+        <DropdownMenuLabel>{username}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>
