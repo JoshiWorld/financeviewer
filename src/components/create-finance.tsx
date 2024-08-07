@@ -38,6 +38,10 @@ export function CreateFinance({ isOpen, onClose }: CreateFinanceProps) {
   const { toast } = useToast();
   const createFinance = api.finance.create.useMutation({
     onSuccess: () => {
+      setTitle("");
+      setPaymentType(PaymentType.MONTHLY);
+      setPaymentDate(new Date());
+      setAmount(0);
       onClose();
       toast({
         description: "Der Eintrag wurde erstellt.",
@@ -93,6 +97,7 @@ export function CreateFinance({ isOpen, onClose }: CreateFinanceProps) {
                   </SelectItem>
                   <SelectItem value={PaymentType.HALF}>Halbjährlich</SelectItem>
                   <SelectItem value={PaymentType.YEARLY}>Jährlich</SelectItem>
+                  <SelectItem value={PaymentType.ONETIME}>Einmalig</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>

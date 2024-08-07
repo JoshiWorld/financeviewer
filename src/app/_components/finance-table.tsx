@@ -46,6 +46,7 @@ const paymentTypeLabels: Record<PaymentType, string> = {
   QUARTER: "Vierteljährlich",
   HALF: "Halbjährlich",
   YEARLY: "Jährlich",
+  ONETIME: "Einmalig",
 };
 
 export function FinanceTable() {

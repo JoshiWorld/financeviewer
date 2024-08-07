@@ -117,6 +117,7 @@ export const financeRouter = createTRPCRouter({
             return paymentMonth % 6 === month % 6;
 
           case PaymentType.YEARLY:
+          case PaymentType.ONETIME:
             // Jährliche Zahlungen sind nur relevant, wenn sie im gleichen Monat des Jahres sind
             return paymentMonth === month;
 
@@ -187,6 +188,7 @@ export const financeRouter = createTRPCRouter({
             break;
 
           case PaymentType.YEARLY:
+          case PaymentType.ONETIME:
             Object.keys(monthlyExpenses).forEach((month, index) => {
               if (index === paymentMonth) {
                 // @ts-expect-error || @ts-ignore

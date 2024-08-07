@@ -143,6 +143,9 @@ export function EditFinance({ financeId, isOpen, onClose }: EditFinanceProps) {
                       <SelectItem value={PaymentType.YEARLY}>
                         Jährlich
                       </SelectItem>
+                      <SelectItem value={PaymentType.ONETIME}>
+                        Einmalig
+                      </SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
