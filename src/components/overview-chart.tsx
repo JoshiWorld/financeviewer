@@ -10,9 +10,18 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { api } from "@/trpc/react";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "./ui/toast";
+import { useState } from "react";
 
 const monthNames = [
   "Januar",
@@ -42,15 +51,18 @@ const chartConfig = {
 
 export function OverviewChart({ userId }: { userId: string }) {
   const { toast } = useToast();
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+
   const {
     data: ausgaben,
     isLoading,
     isError,
     error,
-  } = api.finance.overview.useQuery();
+  } = api.finance.overview.useQuery({ year: parseInt(selectedYear) });
   const user = api.user.get.useQuery({ id: userId });
+  const years = api.finance.getYears.useQuery();
 
-  if (isLoading && user.isLoading) {
+  if (isLoading && user.isLoading && years.isLoading) {
     return <p>Loading..</p>;
   }
 
@@ -74,8 +86,33 @@ export function OverviewChart({ userId }: { userId: string }) {
   }));
 
   return (
-    <div className="overflow-x-auto">
-      <ChartContainer config={chartConfig} className="min-h-[200px] md:min-h-[500px] w-full">
+    <div className="container overflow-x-auto flex flex-col items-center">
+      <div className="my-4">
+        {years.data && (
+          <Select
+            value={selectedYear}
+            onValueChange={(value) => setSelectedYear(value)}
+          >
+            <SelectTrigger className="w-[300px]">
+              <SelectValue placeholder="Jahr auswählen" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {years.data.map((year) => (
+                  <SelectItem key={year.toString()} value={year.toString()}>
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+
+      <ChartContainer
+        config={chartConfig}
+        className="min-h-[200px] w-full md:min-h-[500px]"
+      >
         <BarChart accessibilityLayer data={chartData}>
           <CartesianGrid vertical={false} />
           <XAxis

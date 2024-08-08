@@ -81,6 +81,25 @@ export const financeRouter = createTRPCRouter({
       });
     }),
 
+  getYears: protectedProcedure.query(async ({ctx}) => {
+    const years = await ctx.db.finance.groupBy({
+      by: ['paymentDate'],
+      _count: {
+        paymentDate: true,
+      }
+    });
+
+    const uniqueYears = [
+      ...new Set(
+        years.map((entry) => new Date(entry.paymentDate).getFullYear())
+      )
+    ];
+
+    uniqueYears.sort((a, b) => a - b);
+
+    return uniqueYears;
+  }),
+
   getMonth: protectedProcedure
     .input(
       z.object({
@@ -135,10 +154,33 @@ export const financeRouter = createTRPCRouter({
     }),
 
   overview: protectedProcedure
-    .query(async ({ ctx }) => {
+    .input(z.object({
+      year: z.number().optional()
+    }))
+    .query(async ({ ctx, input }) => {
       const finances = await ctx.db.finance.findMany({
         where: {
           createdBy: { id: ctx.session.user.id },
+          ...(input.year && {
+            OR: [
+              {
+                paymentDate: {
+                  gte: new Date(input.year, 0, 1),
+                  lt: new Date(input.year + 1, 0, 1),
+                },
+              },
+              {
+                type: {
+                  in: [
+                    PaymentType.MONTHLY,
+                    PaymentType.QUARTER,
+                    PaymentType.HALF,
+                    PaymentType.YEARLY,
+                  ],
+                },
+              },
+            ],
+          }),
         },
       });
 
