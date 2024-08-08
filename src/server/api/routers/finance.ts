@@ -104,15 +104,36 @@ export const financeRouter = createTRPCRouter({
     .input(
       z.object({
         month: z.string(),
+        year: z.number().optional()
       }),
     )
     .query(async ({ ctx, input }) => {
       const month = parseInt(input.month, 10);
-
+      
       const finances = await ctx.db.finance.findMany({
-        orderBy: { createdAt: "desc" },
+        orderBy: { paymentDate: "desc" },
         where: {
           createdBy: { id: ctx.session.user.id },
+          ...(input.year && {
+            OR: [
+              {
+                paymentDate: {
+                  gte: new Date(input.year, 0, 1),
+                  lt: new Date(input.year + 1, 0, 1),
+                },
+              },
+              {
+                type: {
+                  in: [
+                    PaymentType.MONTHLY,
+                    PaymentType.QUARTER,
+                    PaymentType.HALF,
+                    PaymentType.YEARLY,
+                  ],
+                },
+              },
+            ],
+          }),
         },
       });
 

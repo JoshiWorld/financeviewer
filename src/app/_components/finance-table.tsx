@@ -53,6 +53,9 @@ export function FinanceTable() {
   const [selectedMonth, setSelectedMonth] = React.useState<string>(
     new Date().getMonth().toString(),
   );
+  const [selectedYear, setSelectedYear] = React.useState<string>(
+    new Date().getFullYear().toString(),
+  );
   const [isEditDialogOpen, setEditDialogOpen] = React.useState<boolean>(false);
   const [isCreateDialogOpen, setCreateDialogOpen] = React.useState<boolean>(false);
   const [selectedFinanceId, setSelectedFinanceId] = React.useState<
@@ -67,12 +70,13 @@ export function FinanceTable() {
     isError,
     error,
   } = api.finance.getMonth.useQuery(
-    { month: selectedMonth },
+    { month: selectedMonth, year: parseInt(selectedYear) },
     {
       refetchOnWindowFocus: true,
       staleTime: 60000,
     },
   );
+  const years = api.finance.getYears.useQuery();
 
   const handleChange = (value: string) => {
     setSelectedMonth(value);
@@ -103,7 +107,7 @@ export function FinanceTable() {
     ]); // Invalide die Query
   };
 
-  if (isLoading) {
+  if (isLoading && years.isLoading) {
     return <div>Loading...</div>;
   }
 
@@ -113,20 +117,45 @@ export function FinanceTable() {
 
   return (
     <>
-      <Select value={selectedMonth} onValueChange={handleChange}>
-        <SelectTrigger className="w-[300px]">
-          <SelectValue placeholder="Abrechnungszeitraum auswählen" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            {months.map((month) => (
-              <SelectItem key={month.value} value={month.value}>
-                {month.label}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+      <div className="flex">
+        <div>
+          <Select value={selectedMonth} onValueChange={handleChange}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Abrechnungszeitraum auswählen" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {months.map((month) => (
+                  <SelectItem key={month.value} value={month.value}>
+                    {month.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="pl-4">
+          {years.data && (
+            <Select
+              value={selectedYear}
+              onValueChange={(value) => setSelectedYear(value)}
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Jahr auswählen" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {years.data.map((year) => (
+                    <SelectItem key={year.toString()} value={year.toString()}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+      </div>
 
       <Table>
         <TableCaption>Alle Fixkosten des Monats.</TableCaption>
