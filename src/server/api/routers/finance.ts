@@ -16,9 +16,49 @@ export const financeRouter = createTRPCRouter({
         amount: z.number(),
         type: paymentTypeSchema,
         paymentDate: z.string(),
+        tagTitle: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      if(!input.tagTitle) {
+        return ctx.db.finance.create({
+          data: {
+            title: input.title,
+            createdBy: { connect: { id: ctx.session.user.id } },
+            amount: input.amount,
+            type: input.type,
+            paymentDate: new Date(input.paymentDate)
+          },
+        });
+      }
+
+      const existingTag = await ctx.db.tag.findFirst({
+        where: {
+          user: { id: ctx.session.user.id },
+          title: input.tagTitle
+        }
+      });
+
+      if(!existingTag) {
+        const createdTag = await ctx.db.tag.create({
+          data: {
+            title: input.tagTitle,
+            user: { connect: { id: ctx.session.user.id } }
+          }
+        });
+
+        return ctx.db.finance.create({
+          data: {
+            title: input.title,
+            createdBy: { connect: { id: ctx.session.user.id } },
+            amount: input.amount,
+            type: input.type,
+            paymentDate: new Date(input.paymentDate),
+            tag: { connect: { id: createdTag.id } },
+          },
+        });
+      }
+
       return ctx.db.finance.create({
         data: {
           title: input.title,
@@ -26,6 +66,7 @@ export const financeRouter = createTRPCRouter({
           amount: input.amount,
           type: input.type,
           paymentDate: new Date(input.paymentDate),
+          tag: { connect: { id: existingTag.id } },
         },
       });
     }),
@@ -34,7 +75,13 @@ export const financeRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const finance = await ctx.db.finance.findUnique({
-        where: { createdBy: { id: ctx.session.user.id }, id: input.id },
+        where: { 
+          createdBy: { id: ctx.session.user.id }, 
+          id: input.id 
+        },
+        include: {
+          tag: true,
+        }
       });
 
       return finance ?? null;
@@ -48,9 +95,49 @@ export const financeRouter = createTRPCRouter({
         paymentDate: z.date().optional(),
         amount: z.number().optional(),
         type: paymentTypeSchema.optional(),
+        tagTitle: z.string().optional()
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      if(!input.tagTitle) {
+        return ctx.db.finance.update({
+          where: { id: input.id },
+          data: {
+            title: input.title,
+            paymentDate: input.paymentDate,
+            amount: input.amount,
+            type: input.type,
+          },
+        });
+      }
+
+      const existingTag = await ctx.db.tag.findFirst({
+        where: {
+          user: { id: ctx.session.user.id },
+          title: input.tagTitle,
+        },
+      });
+
+      if (!existingTag) {
+        const createdTag = await ctx.db.tag.create({
+          data: {
+            title: input.tagTitle,
+            user: { connect: { id: ctx.session.user.id } },
+          },
+        });
+
+        return ctx.db.finance.update({
+          where: { id: input.id },
+          data: {
+            title: input.title,
+            paymentDate: input.paymentDate,
+            amount: input.amount,
+            type: input.type,
+            tag: { connect: { id: createdTag.id } },
+          },
+        });
+      }
+
       return ctx.db.finance.update({
         where: { id: input.id },
         data: {
@@ -58,6 +145,7 @@ export const financeRouter = createTRPCRouter({
           paymentDate: input.paymentDate,
           amount: input.amount,
           type: input.type,
+          tag: { connect: { id: existingTag.id } },
         },
       });
     }),
@@ -135,6 +223,9 @@ export const financeRouter = createTRPCRouter({
             ],
           }),
         },
+        include: {
+          tag: true
+        }
       });
 
       // Filtert die Finanzdaten entsprechend dem PaymentType

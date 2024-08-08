@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -27,7 +28,7 @@ import { PaymentType } from "@prisma/client";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { TagSelector } from "./tag-selector";
 
 type CreateFinanceProps = {
   isOpen: boolean;
@@ -42,12 +43,14 @@ export function CreateFinance({ isOpen, onClose }: CreateFinanceProps) {
       setPaymentType(PaymentType.MONTHLY);
       setPaymentDate(new Date());
       setAmount(0);
+      setSelectedTag(null);
       onClose();
       toast({
         description: "Der Eintrag wurde erstellt.",
       });
     },
   });
+  const tagsQuery = api.user.getTags.useQuery();
 
   const [title, setTitle] = useState<string>("");
   const [paymentType, setPaymentType] = useState<PaymentType>(
@@ -55,6 +58,11 @@ export function CreateFinance({ isOpen, onClose }: CreateFinanceProps) {
   );
   const [paymentDate, setPaymentDate] = useState<Date | undefined>(new Date());
   const [amount, setAmount] = useState<number>(0);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+
+  if (tagsQuery.isLoading) {
+    return <p>Loading..</p>;
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -62,7 +70,7 @@ export function CreateFinance({ isOpen, onClose }: CreateFinanceProps) {
         <DialogHeader>
           <DialogTitle>Eintrag hinzufügen</DialogTitle>
           <DialogDescription>
-            Hier kannst du Fixkosten erstellen
+            Hier kannst du eine neue Ausgabe hinzufügen
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -144,6 +152,11 @@ export function CreateFinance({ isOpen, onClose }: CreateFinanceProps) {
               className="col-span-3"
             />
           </div>
+          <TagSelector
+            tags={tagsQuery.data ?? []}
+            selectedTag={selectedTag}
+            setSelectedTag={setSelectedTag}
+          />
         </div>
         <DialogFooter>
           <Button
@@ -155,6 +168,8 @@ export function CreateFinance({ isOpen, onClose }: CreateFinanceProps) {
                 type: paymentType,
                 amount,
                 paymentDate: paymentDate!.toISOString(),
+                // @ts-expect-error || @ts-ignore
+                tagTitle: selectedTag, // Tag hinzufügen
               })
             }
           >

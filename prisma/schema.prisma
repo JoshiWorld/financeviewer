@@ -28,6 +28,9 @@ model Finance {
     type        PaymentType
     paymentDate DateTime
 
+    tagId String? @db.ObjectId
+    tag   Tag?    @relation(fields: [tagId], references: [id])
+
     @@index([title])
 }
 
@@ -69,6 +72,19 @@ model User {
     accounts      Account[]
     sessions      Session[]
     finances      Finance[]
+    tags          Tag[]
+}
+
+model Tag {
+    id    String @id @default(auto()) @map("_id") @db.ObjectId
+    title String
+
+    userId String @db.ObjectId
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    finances Finance[]
+
+    @@index([title])
 }
 
 model VerificationToken {

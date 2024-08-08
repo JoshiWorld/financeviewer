@@ -29,7 +29,6 @@ export const userRouter = createTRPCRouter({
 
       return user ?? null;
     }),
-
   update: protectedProcedure
     .input(
       z.object({
@@ -65,4 +64,25 @@ export const userRouter = createTRPCRouter({
         data: updateData,
       });
     }),
+
+  getTags: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.db.tag.findMany({
+      where: {
+        user: {
+          id: ctx.session.user.id,
+        },
+      },
+    });
+  }),
+  createTag: protectedProcedure.input(z.object({
+    title: z.string(),
+    financeId: z.string()
+  })).mutation(async ({ ctx, input }) => {
+    return ctx.db.tag.create({
+      data: {
+        title: input.title,
+        user: { connect: { id: ctx.session.user.id } }
+      }
+    })
+  })
 });

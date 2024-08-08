@@ -29,6 +29,7 @@ import { PaymentType } from "@prisma/client";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { TagSelector } from "./tag-selector";
 
 type EditFinanceProps = {
   financeId: string;
@@ -44,6 +45,7 @@ export function EditFinance({ financeId, isOpen, onClose }: EditFinanceProps) {
     isError,
     error,
   } = api.finance.get.useQuery({ id: financeId });
+  const tagsQuery = api.user.getTags.useQuery();
 
   const editFinance = api.finance.update.useMutation({
     onSuccess: () => {
@@ -69,6 +71,7 @@ export function EditFinance({ financeId, isOpen, onClose }: EditFinanceProps) {
   );
   const [paymentDate, setPaymentDate] = useState<Date | undefined>(new Date());
   const [amount, setAmount] = useState<number>(0);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
   useEffect(() => {
     if (isError) {
@@ -86,8 +89,15 @@ export function EditFinance({ financeId, isOpen, onClose }: EditFinanceProps) {
       setPaymentType(finance.type);
       setPaymentDate(finance.paymentDate);
       setAmount(finance.amount);
+      if(finance.tag) {
+        setSelectedTag(finance.tag?.title);
+      }
     }
   }, [isError, toast, error, finance]);
+
+  if(isLoading && tagsQuery.isLoading) {
+    return <p>Loading..</p>
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -194,6 +204,11 @@ export function EditFinance({ financeId, isOpen, onClose }: EditFinanceProps) {
                   className="col-span-3"
                 />
               </div>
+              <TagSelector
+                tags={tagsQuery.data ?? []}
+                selectedTag={selectedTag}
+                setSelectedTag={setSelectedTag}
+              />
             </div>
           )
         )}
@@ -220,6 +235,8 @@ export function EditFinance({ financeId, isOpen, onClose }: EditFinanceProps) {
                 type: paymentType,
                 amount,
                 paymentDate,
+                // @ts-expect-error || @ts-ignore
+                tagTitle: selectedTag
               })
             }
           >

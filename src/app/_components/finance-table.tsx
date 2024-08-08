@@ -25,6 +25,7 @@ import { useQueryClient } from "@tanstack/react-query"; // Importiere useQueryCl
 import { Button } from "@/components/ui/button";
 import { CreateFinance } from "@/components/create-finance";
 import { PaymentType } from "@prisma/client";
+import { Badge } from "@/components/ui/badge";
 
 const months = [
   { value: "0", label: "Januar" },
@@ -182,7 +183,10 @@ export function FinanceTable() {
               <TableCell className="font-medium">
                 {paymentTypeLabels[finance.type]}
               </TableCell>
-              <TableCell>{finance.title}</TableCell>
+              <TableCell>
+                {finance.title}
+                {finance.tag && <Badge className="ml-2">{finance.tag.title}</Badge>}
+              </TableCell>
               <TableCell>
                 Am {new Date(finance.paymentDate).getDate()}. Tag des Monats
               </TableCell>
@@ -231,38 +235,4 @@ export function FinanceTable() {
       )}
     </>
   );
-}
-
-function isPastPayment(
-  paymentDate: string | Date,
-  paymentType: PaymentType,
-): boolean {
-  const now = new Date();
-  const payment = new Date(paymentDate);
-
-  switch (paymentType) {
-    case PaymentType.MONTHLY:
-      // Zahlung ist überfällig, wenn das Datum in der Vergangenheit liegt
-      return payment < now;
-
-    case PaymentType.QUARTER:
-      // Überprüfung ob das Zahlungsdatum in diesem Quartal liegt oder in der Vergangenheit
-      const currentQuarter = Math.floor(now.getMonth() / 3);
-      const paymentQuarter = Math.floor(payment.getMonth() / 3);
-      return payment < now && paymentQuarter <= currentQuarter;
-
-    case PaymentType.HALF:
-      // Überprüfung ob das Zahlungsdatum im aktuellen Halbjahr liegt oder in der Vergangenheit
-      const currentHalf = Math.floor(now.getMonth() / 6);
-      const paymentHalf = Math.floor(payment.getMonth() / 6);
-      return payment < now && paymentHalf <= currentHalf;
-
-    case PaymentType.YEARLY:
-    case PaymentType.ONETIME:
-      // Überprüfung ob das Zahlungsdatum in der Vergangenheit liegt
-      return payment < now;
-
-    default:
-      return false;
-  }
 }
