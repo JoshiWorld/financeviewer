@@ -24,7 +24,7 @@ import { EditFinance } from "@/components/edit-finance";
 import { useQueryClient } from "@tanstack/react-query"; // Importiere useQueryClient
 import { Button } from "@/components/ui/button";
 import { CreateFinance } from "@/components/create-finance";
-import { PaymentType } from "@prisma/client";
+import { type PaymentType } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
 
 const months = [
