@@ -20,6 +20,15 @@ export const userRouter = createTRPCRouter({
 
       return user ?? null;
     }),
+  getByMail: protectedProcedure
+    .input(z.object({ mail: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findUnique({
+        where: { email: input.mail },
+      });
+
+      return user ?? null;
+    }),
 
   update: protectedProcedure
     .input(
@@ -29,7 +38,7 @@ export const userRouter = createTRPCRouter({
         email: z.string().optional(),
         image: z.string().optional(),
         emailVerified: z.date().optional(),
-        income: z.number().optional()
+        income: z.number().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
