@@ -20,14 +20,14 @@ export const financeRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if(!input.tagTitle) {
+      if (!input.tagTitle) {
         return ctx.db.finance.create({
           data: {
             title: input.title,
             createdBy: { connect: { id: ctx.session.user.id } },
             amount: input.amount,
             type: input.type,
-            paymentDate: new Date(input.paymentDate)
+            paymentDate: new Date(input.paymentDate),
           },
         });
       }
@@ -35,16 +35,16 @@ export const financeRouter = createTRPCRouter({
       const existingTag = await ctx.db.tag.findFirst({
         where: {
           user: { id: ctx.session.user.id },
-          title: input.tagTitle
-        }
+          title: input.tagTitle,
+        },
       });
 
-      if(!existingTag) {
+      if (!existingTag) {
         const createdTag = await ctx.db.tag.create({
           data: {
             title: input.tagTitle,
-            user: { connect: { id: ctx.session.user.id } }
-          }
+            user: { connect: { id: ctx.session.user.id } },
+          },
         });
 
         return ctx.db.finance.create({
@@ -75,13 +75,13 @@ export const financeRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const finance = await ctx.db.finance.findUnique({
-        where: { 
-          createdBy: { id: ctx.session.user.id }, 
-          id: input.id 
+        where: {
+          createdBy: { id: ctx.session.user.id },
+          id: input.id,
         },
         include: {
           tag: true,
-        }
+        },
       });
 
       return finance ?? null;
@@ -95,11 +95,11 @@ export const financeRouter = createTRPCRouter({
         paymentDate: z.date().optional(),
         amount: z.number().optional(),
         type: paymentTypeSchema.optional(),
-        tagTitle: z.string().optional()
+        tagTitle: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if(!input.tagTitle) {
+      if (!input.tagTitle) {
         return ctx.db.finance.update({
           where: { id: input.id },
           data: {
@@ -169,18 +169,18 @@ export const financeRouter = createTRPCRouter({
       });
     }),
 
-  getYears: protectedProcedure.query(async ({ctx}) => {
+  getYears: protectedProcedure.query(async ({ ctx }) => {
     const years = await ctx.db.finance.groupBy({
-      by: ['paymentDate'],
+      by: ["paymentDate"],
       _count: {
         paymentDate: true,
-      }
+      },
     });
 
     const uniqueYears = [
       ...new Set(
-        years.map((entry) => new Date(entry.paymentDate).getFullYear())
-      )
+        years.map((entry) => new Date(entry.paymentDate).getFullYear()),
+      ),
     ];
 
     uniqueYears.sort((a, b) => a - b);
@@ -192,12 +192,12 @@ export const financeRouter = createTRPCRouter({
     .input(
       z.object({
         month: z.string(),
-        year: z.number().optional()
+        year: z.number().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
       const month = parseInt(input.month, 10);
-      
+
       const finances = await ctx.db.finance.findMany({
         orderBy: { paymentDate: "desc" },
         where: {
@@ -224,8 +224,8 @@ export const financeRouter = createTRPCRouter({
           }),
         },
         include: {
-          tag: true
-        }
+          tag: true,
+        },
       });
 
       // Filtert die Finanzdaten entsprechend dem PaymentType
@@ -266,9 +266,11 @@ export const financeRouter = createTRPCRouter({
     }),
 
   overview: protectedProcedure
-    .input(z.object({
-      year: z.number().optional()
-    }))
+    .input(
+      z.object({
+        year: z.number().optional(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       const finances = await ctx.db.finance.findMany({
         where: {
@@ -357,5 +359,58 @@ export const financeRouter = createTRPCRouter({
       });
 
       return monthlyExpenses;
+    }),
+
+  tagsOverview: protectedProcedure
+    .input(
+      z.object({
+        year: z.number().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const tags = await ctx.db.tag.findMany();
+      const finances = await ctx.db.finance.findMany({
+        where: {
+          createdById: ctx.session.user.id,
+          ...(input.year && {
+            OR: [
+              {
+                paymentDate: {
+                  gte: new Date(input.year, 0, 1),
+                  lt: new Date(input.year + 1, 0, 1),
+                },
+              },
+            ],
+          }),
+        },
+        include: {
+          tag: true,
+        },
+      });
+
+      const tagExpenses: Record<string, number> = {};
+
+      finances.forEach((finance) => {
+        tags.forEach((tag) => {
+          if (!tagExpenses[tag.title]) {
+            tagExpenses[tag.title] = 0;
+          }
+
+          // @ts-expect-error || @ts-ignore
+          if(finance.tag?.id === tag.id) tagExpenses[tag.title] += finance.amount;
+          // else {
+          //   if(!tagExpenses.Unknown) {
+          //     tagExpenses.Unknown = 0;
+          //   }
+          //   tagExpenses.Unknown += finance.amount;
+          // }
+        });
+      });
+
+      // Das Array der Tags mit ihren Kosten zurückgeben
+      return Object.entries(tagExpenses).map(([tag, amount]) => ({
+        tag,
+        amount,
+      }));
     }),
 });

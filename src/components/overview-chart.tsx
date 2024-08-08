@@ -22,6 +22,7 @@ import { api } from "@/trpc/react";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "./ui/toast";
 import { useState } from "react";
+import { MonthTagsOverviewChart } from "./month-tags-overview";
 
 const monthNames = [
   "Januar",
@@ -59,14 +60,15 @@ export function OverviewChart({ userId }: { userId: string }) {
     isError,
     error,
   } = api.finance.overview.useQuery({ year: parseInt(selectedYear) });
+  const tags = api.finance.tagsOverview.useQuery({ year: parseInt(selectedYear) });
   const user = api.user.get.useQuery({ id: userId });
   const years = api.finance.getYears.useQuery();
 
-  if (isLoading && user.isLoading && years.isLoading) {
+  if (isLoading && user.isLoading && years.isLoading && tags.isLoading) {
     return <p>Loading..</p>;
   }
 
-  if (isError) {
+  if (isError || user.isError || years.isError || tags.isError) {
     toast({
       variant: "destructive",
       title: "Ups! Da ist wohl etwas schiefgelaufen.",
@@ -86,7 +88,7 @@ export function OverviewChart({ userId }: { userId: string }) {
   }));
 
   return (
-    <div className="container overflow-x-auto flex flex-col items-center">
+    <div className="container flex flex-col items-center overflow-x-auto">
       <div className="my-4">
         {years.data && (
           <Select
@@ -129,6 +131,9 @@ export function OverviewChart({ userId }: { userId: string }) {
           <Bar dataKey="ausgaben" fill="var(--color-ausgaben)" radius={4} />
         </BarChart>
       </ChartContainer>
+      <div className="mt-5 flex justify-between">
+        {tags.data && <MonthTagsOverviewChart tagsData={tags.data} />}
+      </div>
     </div>
   );
 }
