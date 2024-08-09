@@ -4,7 +4,7 @@ import { getServerAuthSession } from "@/server/auth";
 export default async function Home() {
   const session = await getServerAuthSession();
 
-  return <div>{session?.user && <OverviewChart userId={session.user.id} />}</div>;
+  return <div>{session?.user && <OverviewChart />}</div>;
 }
 
 {/* <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">

@@ -46,6 +46,7 @@ export function EditFinance({ financeId, isOpen, onClose }: EditFinanceProps) {
     error,
   } = api.finance.get.useQuery({ id: financeId });
   const tagsQuery = api.user.getTags.useQuery();
+  const user = api.user.get.useQuery();
 
   const editFinance = api.finance.update.useMutation({
     onSuccess: () => {
@@ -95,7 +96,7 @@ export function EditFinance({ financeId, isOpen, onClose }: EditFinanceProps) {
     }
   }, [isError, toast, error, finance]);
 
-  if(isLoading && tagsQuery.isLoading) {
+  if(isLoading && tagsQuery.isLoading && user.isLoading) {
     return <p>Loading..</p>
   }
 
@@ -204,11 +205,13 @@ export function EditFinance({ financeId, isOpen, onClose }: EditFinanceProps) {
                   className="col-span-3"
                 />
               </div>
-              <TagSelector
-                tags={tagsQuery.data ?? []}
-                selectedTag={selectedTag}
-                setSelectedTag={setSelectedTag}
-              />
+              {user.data?.premium && (
+                <TagSelector
+                  tags={tagsQuery.data ?? []}
+                  selectedTag={selectedTag}
+                  setSelectedTag={setSelectedTag}
+                />
+              )}
             </div>
           )
         )}
@@ -236,7 +239,7 @@ export function EditFinance({ financeId, isOpen, onClose }: EditFinanceProps) {
                 amount,
                 paymentDate,
                 // @ts-expect-error || @ts-ignore
-                tagTitle: selectedTag
+                tagTitle: selectedTag,
               })
             }
           >

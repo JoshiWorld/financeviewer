@@ -12,10 +12,9 @@ type UpdatedData = {
 
 export const userRouter = createTRPCRouter({
   get: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx }) => {
       const user = await ctx.db.user.findUnique({
-        where: { id: input.id },
+        where: { id: ctx.session.user.id },
       });
 
       return user ?? null;

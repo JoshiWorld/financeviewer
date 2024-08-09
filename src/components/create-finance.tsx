@@ -51,6 +51,7 @@ export function CreateFinance({ isOpen, onClose }: CreateFinanceProps) {
     },
   });
   const tagsQuery = api.user.getTags.useQuery();
+  const user = api.user.get.useQuery();
 
   const [title, setTitle] = useState<string>("");
   const [paymentType, setPaymentType] = useState<PaymentType>(
@@ -60,7 +61,7 @@ export function CreateFinance({ isOpen, onClose }: CreateFinanceProps) {
   const [amount, setAmount] = useState<number>(0);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
-  if (tagsQuery.isLoading) {
+  if (tagsQuery.isLoading && user.isLoading) {
     return <p>Loading..</p>;
   }
 
@@ -152,11 +153,13 @@ export function CreateFinance({ isOpen, onClose }: CreateFinanceProps) {
               className="col-span-3"
             />
           </div>
-          <TagSelector
-            tags={tagsQuery.data ?? []}
-            selectedTag={selectedTag}
-            setSelectedTag={setSelectedTag}
-          />
+          {user.data?.premium && (
+            <TagSelector
+              tags={tagsQuery.data ?? []}
+              selectedTag={selectedTag}
+              setSelectedTag={setSelectedTag}
+            />
+          )}
         </div>
         <DialogFooter>
           <Button

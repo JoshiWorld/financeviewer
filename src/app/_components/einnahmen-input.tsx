@@ -16,7 +16,7 @@ export function EinnahmenInput({ userId }: { userId: string }) {
     isLoading,
     isError,
     error,
-  } = api.user.get.useQuery({ id: userId });
+  } = api.user.get.useQuery();
   const updateIncome = api.user.update.useMutation({
     onSuccess: () => {
         toast({

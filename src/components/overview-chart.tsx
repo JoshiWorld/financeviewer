@@ -50,7 +50,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function OverviewChart({ userId }: { userId: string }) {
+export function OverviewChart() {
   const { toast } = useToast();
   const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
 
@@ -61,7 +61,7 @@ export function OverviewChart({ userId }: { userId: string }) {
     error,
   } = api.finance.overview.useQuery({ year: parseInt(selectedYear) });
   const tags = api.finance.tagsOverview.useQuery({ year: parseInt(selectedYear) });
-  const user = api.user.get.useQuery({ id: userId });
+  const user = api.user.get.useQuery();
   const years = api.finance.getYears.useQuery();
 
   if (isLoading && user.isLoading && years.isLoading && tags.isLoading) {
@@ -132,7 +132,7 @@ export function OverviewChart({ userId }: { userId: string }) {
         </BarChart>
       </ChartContainer>
       <div className="mt-5 flex justify-between">
-        {tags.data && <MonthTagsOverviewChart tagsData={tags.data} />}
+        {tags.data && user.data?.premium && <MonthTagsOverviewChart tagsData={tags.data} />}
       </div>
     </div>
   );

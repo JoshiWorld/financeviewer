@@ -69,6 +69,7 @@ model User {
     emailVerified DateTime?
     image         String?
     income        Float?
+    premium       Boolean?
     accounts      Account[]
     sessions      Session[]
     finances      Finance[]

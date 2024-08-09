@@ -34,7 +34,7 @@ export function SettingsForm({ userId }: { userId: string }) {
     isLoading,
     isError,
     error,
-  } = api.user.get.useQuery({ id: userId });
+  } = api.user.get.useQuery();
 
   const updateUser = api.user.update.useMutation({
     onSuccess: () => {
