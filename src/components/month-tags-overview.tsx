@@ -95,7 +95,7 @@ function PieTagChart({ tags, year, month }: { tags: Tag[], year: string, month: 
   const roundedTotal = Math.floor(totalAmount * 100) / 100;
 
   const chartConfig = tags.reduce((config, tag, index) => {
-    const color = `hsl(var(--chart-${(index % 5) + 1}))`;
+    const color = `hsl(var(--chart-${(index % 7) + 1}))`;
 
     config[tag.tag] = {
       label: tag.tag,
