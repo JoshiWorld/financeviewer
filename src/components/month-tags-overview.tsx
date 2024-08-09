@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Pie, PieChart } from "recharts";
+import { Label, Pie, PieChart } from "recharts";
 
 import {
   Card,
@@ -16,18 +16,85 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { api } from "@/trpc/react";
 
-type TagOverview = {
-  tag: string;
-  amount: number;
-};
+const months = [
+  "Januar",
+  "Februar",
+  "März",
+  "April",
+  "Mai",
+  "Juni",
+  "Juli",
+  "August",
+  "September",
+  "October",
+  "November",
+  "Dezember",
+];
 
 export function MonthTagsOverviewChart({
-  tagsData,
+  year,
 }: {
-  tagsData: TagOverview[];
+  year: string;
 }) {
-  const chartConfig = tagsData.reduce((config, tag, index) => {
+  const [selectedMonth, setSelectedMonth] = React.useState<string>(new Date().getMonth().toString());
+
+  const { data: tags, isLoading } = api.finance.tagsOverview.useQuery({
+    year: parseInt(year),
+    month: parseInt(selectedMonth)
+  });
+
+  if(isLoading) {
+    return <p>Loading..</p>;
+  }
+
+  if(tags) {
+    return (
+      <div className="flex flex-col items-center p-4 border-4 rounded-lg border-zinc-800 shadow-lg">
+        <Select
+          value={selectedMonth}
+          onValueChange={(value) => setSelectedMonth(value)}
+        >
+          <SelectTrigger className="w-[300px]">
+            <SelectValue placeholder="Select a month" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {months.map((month, index) => (
+                <SelectItem key={index} value={index.toString()}>
+                  {month}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+        <PieTagChart tags={tags} year={year} month={selectedMonth} />
+      </div>
+    );
+  }
+
+  return <p>Loading error..</p>;
+}
+
+type Tag = {
+  tag: string;
+  amount: number;
+}
+
+function PieTagChart({ tags, year, month }: { tags: Tag[], year: string, month: string }) {
+  const totalAmount = tags.reduce((sum, tag) => sum + tag.amount, 0);
+  const roundedTotal = Math.floor(totalAmount * 100) / 100;
+
+  const chartConfig = tags.reduce((config, tag, index) => {
     const color = `hsl(var(--chart-${(index % 5) + 1}))`;
 
     config[tag.tag] = {
@@ -38,20 +105,18 @@ export function MonthTagsOverviewChart({
     return config;
   }, {} as ChartConfig);
 
-  const chartData = tagsData.map((tag) => ({
+  const chartData = tags.map((tag) => ({
     tag: tag.tag,
     amount: tag.amount,
     // @ts-expect-error || @ts-ignore
     fill: chartConfig[tag.tag].color,
   }));
 
-  console.log(chartData);
-
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col my-4">
       <CardHeader className="items-center pb-0">
         <CardTitle>Ausgaben nach Kategorien</CardTitle>
-        <CardDescription>Alle Fixkosten gesammelt</CardDescription>
+        <CardDescription>{months[parseInt(month)]} {year}</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
@@ -70,7 +135,7 @@ export function MonthTagsOverviewChart({
               innerRadius={60}
               strokeWidth={5}
             >
-              {/* <Label
+              <Label
                 content={({ viewBox }) => {
                   if (viewBox && "cx" in viewBox && "cy" in viewBox) {
                     return (
@@ -83,22 +148,22 @@ export function MonthTagsOverviewChart({
                         <tspan
                           x={viewBox.cx}
                           y={viewBox.cy}
-                          className="fill-foreground text-3xl font-bold"
+                          className="fill-foreground text-xl font-bold"
                         >
-                          {totalVisitors.toLocaleString()}
+                          {roundedTotal.toLocaleString()} €
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy ?? 0) + 24}
                           className="fill-muted-foreground"
                         >
-                          Visitors
+                          Ausgaben
                         </tspan>
                       </text>
                     );
                   }
                 }}
-              /> */}
+              />
             </Pie>
           </PieChart>
         </ChartContainer>

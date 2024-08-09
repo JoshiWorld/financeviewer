@@ -364,7 +364,8 @@ export const financeRouter = createTRPCRouter({
   tagsOverview: protectedProcedure
     .input(
       z.object({
-        year: z.number().optional(),
+        year: z.number(),
+        month: z.number(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -388,23 +389,47 @@ export const financeRouter = createTRPCRouter({
         },
       });
 
+      const filteredFinances = finances.filter((finance) => {
+        const paymentDate = new Date(finance.paymentDate);
+        const paymentMonth = paymentDate.getMonth();
+
+        switch (finance.type) {
+          case PaymentType.MONTHLY:
+            return true;
+
+          case PaymentType.QUARTER:
+            return paymentMonth % 3 === input.month % 3;
+
+          case PaymentType.HALF:
+            return paymentMonth % 6 === input.month % 6;
+
+          case PaymentType.YEARLY:
+          case PaymentType.ONETIME:
+            return paymentMonth === input.month;
+
+          default:
+            return false;
+        }
+      });
+
       const tagExpenses: Record<string, number> = {};
 
-      finances.forEach((finance) => {
-        tags.forEach((tag) => {
-          if (!tagExpenses[tag.title]) {
-            tagExpenses[tag.title] = 0;
+      filteredFinances.forEach((finance) => {
+        if (!finance.tag) {
+          // If the finance entry has no tag, add it to "Unknown"
+          if (!tagExpenses.Unknown) {
+            tagExpenses.Unknown = 0;
+          }
+          tagExpenses.Unknown += finance.amount;
+        } else {
+          // If the finance entry has a tag, add it to the corresponding tag
+          const tagTitle = finance.tag.title;
+          if (!tagExpenses[tagTitle]) {
+            tagExpenses[tagTitle] = 0;
           }
 
-          // @ts-expect-error || @ts-ignore
-          if(finance.tag?.id === tag.id) tagExpenses[tag.title] += finance.amount;
-          // else {
-          //   if(!tagExpenses.Unknown) {
-          //     tagExpenses.Unknown = 0;
-          //   }
-          //   tagExpenses.Unknown += finance.amount;
-          // }
-        });
+          tagExpenses[tagTitle] += finance.amount;
+        }
       });
 
       // Das Array der Tags mit ihren Kosten zurückgeben

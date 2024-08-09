@@ -60,15 +60,14 @@ export function OverviewChart() {
     isError,
     error,
   } = api.finance.overview.useQuery({ year: parseInt(selectedYear) });
-  const tags = api.finance.tagsOverview.useQuery({ year: parseInt(selectedYear) });
   const user = api.user.get.useQuery();
   const years = api.finance.getYears.useQuery();
 
-  if (isLoading && user.isLoading && years.isLoading && tags.isLoading) {
+  if (isLoading && user.isLoading && years.isLoading) {
     return <p>Loading..</p>;
   }
 
-  if (isError || user.isError || years.isError || tags.isError) {
+  if (isError || user.isError || years.isError) {
     toast({
       variant: "destructive",
       title: "Ups! Da ist wohl etwas schiefgelaufen.",
@@ -132,7 +131,7 @@ export function OverviewChart() {
         </BarChart>
       </ChartContainer>
       <div className="mt-5 flex justify-between">
-        {tags.data && user.data?.premium && <MonthTagsOverviewChart tagsData={tags.data} />}
+        {user.data?.premium && <MonthTagsOverviewChart year={selectedYear} />}
       </div>
     </div>
   );
