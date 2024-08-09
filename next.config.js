@@ -5,6 +5,13 @@
 await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+    // reactStrictMode: true,
+    // swcMinify: true,
+    // images: {
+    //     unoptimized: true
+    // },
+    // output: 'export'
+};
 
 export default config;
