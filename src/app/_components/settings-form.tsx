@@ -25,6 +25,7 @@ const formSchema = z.object({
   name: z.string().min(2).max(50),
   email: z.string().min(2).max(50),
   image: z.string().min(2),
+  income: z.number(),
 });
 
 export function SettingsForm({ userId }: { userId: string }) {
@@ -50,11 +51,12 @@ export function SettingsForm({ userId }: { userId: string }) {
       name: "",
       email: "",
       image: "",
+      income: 0,
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateUser.mutate({ id: userId, email: values.email, name: values.name, image: values.image });
+    updateUser.mutate({ id: userId, email: values.email, name: values.name, image: values.image, income: values.income });
   }
 
   useEffect(() => {
@@ -62,6 +64,7 @@ export function SettingsForm({ userId }: { userId: string }) {
       form.setValue("name", user.name!);
       form.setValue("email", user.email!);
       form.setValue("image", user.image!);
+      form.setValue("income", user.income!);
     }
   }, [user, form]);
 
@@ -123,6 +126,20 @@ export function SettingsForm({ userId }: { userId: string }) {
                 <Input type="text" placeholder="Link zu Bild" {...field} />
               </FormControl>
               <FormDescription>Dein Profilbild.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="income"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Einkommen</FormLabel>
+              <FormControl>
+                <Input type="number" placeholder="Einkommen" {...field} />
+              </FormControl>
+              <FormDescription>Dein Einkommen.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
