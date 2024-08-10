@@ -1,7 +1,8 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import {
   getServerSession,
-  type DefaultSession,
+  type ISODateString,
+  // type DefaultSession,
   type NextAuthOptions,
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
@@ -10,6 +11,16 @@ import GoogleProvider from "next-auth/providers/google";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
+
+interface DefaultSession {
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    premium?: boolean | null;
+  };
+  expires: ISODateString;
+}
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -46,6 +57,48 @@ export const authOptions: NextAuthOptions = {
         id: user.id,
       },
     }),
+    async signIn({ user, account }) {
+      if(!user.email) return false;
+      if(!account) return false;
+
+      const currentUser = await db.user.findUnique({
+        where: {
+          email: user.email,
+        }
+      });
+
+      if(!currentUser) return true;
+
+      const accounts = await db.account.findMany({
+        where: {
+          user: { id: currentUser.id }
+        }
+      });
+
+      if (
+        !accounts ||
+        accounts.length === 0 ||
+        !accounts.some((a) => a.provider === account.provider)
+      ) {
+        await db.account.create({
+          data: {
+            provider: account.provider,
+            providerAccountId: account.providerAccountId,
+            type: account.type,
+            access_token: account.access_token,
+            expires_at: account.expires_at,
+            user: { connect: { id: currentUser.id } },
+            refresh_token: account.refresh_token,
+            id_token: account.id_token,
+            scope: account.scope,
+            session_state: account.session_state,
+            token_type: account.token_type,
+          },
+        });
+      }
+
+      return true;
+    },
   },
   // pages: {
   //   signIn: '/auth/login',
