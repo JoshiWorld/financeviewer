@@ -21,7 +21,7 @@ model Finance {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    createdBy   User   @relation(fields: [createdById], references: [id])
+    createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Cascade)
     createdById String @db.ObjectId
 
     amount      Float
@@ -68,7 +68,7 @@ model User {
     email         String?   @unique
     emailVerified DateTime?
     image         String?
-    income        Float?
+    income        Float?    @default(0)
     premium       Boolean?
     accounts      Account[]
     sessions      Session[]

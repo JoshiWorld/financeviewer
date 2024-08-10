@@ -20,16 +20,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   name: z.string().min(2).max(50),
   email: z.string().min(2).max(50),
   image: z.string().min(2),
-  income: z.number(),
+  income: z.string(),
 });
 
 export function SettingsForm({ userId }: { userId: string }) {
   const { toast } = useToast();
+  const router = useRouter();
   const {
     data: user,
     isLoading,
@@ -45,18 +47,34 @@ export function SettingsForm({ userId }: { userId: string }) {
     },
   });
 
+  const deleteUser = api.user.delete.useMutation({
+    onSuccess: () => {
+      router.push('/');
+      window.location.reload();
+      toast({
+        description: "Dein Account wurde gelöscht.",
+      });
+    }
+  })
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       email: "",
       image: "",
-      income: 0,
+      income: "0",
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateUser.mutate({ id: userId, email: values.email, name: values.name, image: values.image, income: values.income });
+    updateUser.mutate({
+      id: userId,
+      email: values.email,
+      name: values.name,
+      image: values.image,
+      income: parseFloat(values.income),
+    });
   }
 
   useEffect(() => {
@@ -64,7 +82,7 @@ export function SettingsForm({ userId }: { userId: string }) {
       form.setValue("name", user.name!);
       form.setValue("email", user.email!);
       form.setValue("image", user.image!);
-      form.setValue("income", user.income!);
+      form.setValue("income", user.income!.toString());
     }
   }, [user, form]);
 
@@ -144,7 +162,15 @@ export function SettingsForm({ userId }: { userId: string }) {
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={updateUser.isPending}>
+        <Button
+          disabled={deleteUser.isPending}
+          type="button"
+          variant={"destructive"}
+          onClick={() => deleteUser.mutate()}
+        >
+          {deleteUser.isPending ? "Wird gelöscht.." : "Account löschen"}
+        </Button>
+        <Button type="submit" disabled={updateUser.isPending} className="ml-6">
           {updateUser.isPending ? "Wird gespeichert.." : "Speichern"}
         </Button>
       </form>
