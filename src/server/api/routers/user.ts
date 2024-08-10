@@ -10,15 +10,18 @@ type UpdatedData = {
   emailVerified?: Date;
 };
 
-export const userRouter = createTRPCRouter({
-  get: protectedProcedure
-    .query(async ({ ctx }) => {
-      const user = await ctx.db.user.findUnique({
-        where: { id: ctx.session.user.id },
-      });
+type UpdatedTag = {
+  title?: string;
+};
 
-      return user ?? null;
-    }),
+export const userRouter = createTRPCRouter({
+  get: protectedProcedure.query(async ({ ctx }) => {
+    const user = await ctx.db.user.findUnique({
+      where: { id: ctx.session.user.id },
+    });
+
+    return user ?? null;
+  }),
   getByMail: protectedProcedure
     .input(z.object({ mail: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -73,15 +76,61 @@ export const userRouter = createTRPCRouter({
       },
     });
   }),
-  createTag: protectedProcedure.input(z.object({
-    title: z.string(),
-    financeId: z.string()
-  })).mutation(async ({ ctx, input }) => {
-    return ctx.db.tag.create({
-      data: {
-        title: input.title,
-        user: { connect: { id: ctx.session.user.id } }
+  createTag: protectedProcedure
+    .input(
+      z.object({
+        title: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.tag.create({
+        data: {
+          title: input.title,
+          user: { connect: { id: ctx.session.user.id } },
+        },
+      });
+    }),
+  getTag: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.tag.findUnique({
+        where: {
+          user: {
+            id: ctx.session.user.id,
+          },
+          id: input.id,
+        },
+      });
+    }),
+  deleteTag: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.tag.delete({
+        where: {
+          user: {
+            id: ctx.session.user.id,
+          },
+          id: input.id,
+        },
+      });
+    }),
+  updateTag: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        title: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const updateData: UpdatedTag = {};
+
+      if (input.title !== undefined) {
+        updateData.title = input.title;
       }
-    })
-  })
+
+      return ctx.db.tag.update({
+        where: { id: input.id, user: { id: ctx.session.user.id } },
+        data: updateData,
+      });
+    }),
 });

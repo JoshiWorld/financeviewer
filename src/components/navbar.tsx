@@ -80,10 +80,10 @@ export function NavbarLoggedIn({ session }: { session: Session }) {
             Ausgaben
           </Link>
           <Link
-            href="/einnahmen"
-            className={`ml-5 font-semibold ${path === "/einnahmen" ? "border-b-2 border-primary" : ""}`}
+            href="/tags"
+            className={`ml-5 font-semibold ${path === "/tags" ? "border-b-2 border-primary" : ""}`}
           >
-            Einnahmen
+            Tags
           </Link>
         </div>
         <div className="hidden md:flex md:items-center md:space-x-4">
