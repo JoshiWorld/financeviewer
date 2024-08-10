@@ -226,7 +226,7 @@ export function EditFinance({ financeId, isOpen, onClose }: EditFinanceProps) {
               })
             }
           >
-            {editFinance.isPending ? "Wird gelöscht.." : "Löschen"}
+            {deleteFinance.isPending ? "Wird gelöscht.." : "Löschen"}
           </Button>
           <Button
             type="submit"
