@@ -67,6 +67,20 @@ export const userRouter = createTRPCRouter({
       });
     }),
 
+  delete: protectedProcedure.mutation(async ({ ctx }) => {
+    await ctx.db.account.deleteMany({
+      where: {
+        user: { id: ctx.session.user.id }
+      }
+    });
+
+    return ctx.db.user.delete({
+      where: {
+        id: ctx.session.user.id
+      }
+    });
+  }),
+
   getTags: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.tag.findMany({
       where: {
