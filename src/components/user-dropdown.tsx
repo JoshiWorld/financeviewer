@@ -18,8 +18,10 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "./ui/badge";
+import { type User } from "@prisma/client";
 
-export function UserDropdown({ username, image }: { username: string | null | undefined, image: string | null | undefined }) {
+export function UserDropdown({ user }: { user: User | null | undefined }) {
   const path = usePathname();
 
   return (
@@ -30,12 +32,12 @@ export function UserDropdown({ username, image }: { username: string | null | un
           className={`cursor-pointer ${path === "/settings" ? "border-2 border-primary" : ""}`}
         >
           {/* @ts-expect-error || @ts-ignore */}
-          <AvatarImage src={image} />
+          <AvatarImage src={user?.image} />
           <AvatarFallback>PB</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>{username}</DropdownMenuLabel>
+        <DropdownMenuLabel>{user?.name} {user?.premium && <Badge variant={"gold"}>Premium</Badge>}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>

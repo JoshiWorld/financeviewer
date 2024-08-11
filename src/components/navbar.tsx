@@ -6,6 +6,7 @@ import { type Session } from "next-auth";
 import { UserDropdown } from "./user-dropdown";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { api } from "@/trpc/react";
 
 export function Navbar() {
     return (
@@ -33,6 +34,10 @@ export function Navbar() {
 export function NavbarLoggedIn({ session }: { session: Session }) {
   const [isOpen, setIsOpen] = useState(false);
   const path = usePathname();
+
+  const { data: user, isLoading } = api.user.get.useQuery();
+
+  if(isLoading) return <p>Loading..</p>;
 
   return (
     <div className="border-b-2 bg-background">
@@ -85,8 +90,7 @@ export function NavbarLoggedIn({ session }: { session: Session }) {
         </div>
         <div className="hidden md:flex md:items-center md:space-x-4">
           <UserDropdown
-            username={session.user.name}
-            image={session.user.image}
+            user={user}
           />
           <ToggleTheme />
         </div>
