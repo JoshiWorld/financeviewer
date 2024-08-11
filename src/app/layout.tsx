@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { api, HydrateClient } from "@/trpc/server";
 import { getServerAuthSession } from "@/server/auth";
 import { Navbar, NavbarLoggedIn } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 
 export const metadata: Metadata = {
   title: "FinanceViewer",
@@ -57,6 +58,7 @@ export default async function RootLayout({
                   {children}
                 </div>
               </main>
+              <Footer />
             </HydrateClient>
             <Toaster />
           </ThemeProvider>
