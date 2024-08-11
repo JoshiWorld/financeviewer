@@ -369,7 +369,7 @@ export const financeRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const tags = await ctx.db.tag.findMany();
+      // const tags = await ctx.db.tag.findMany();
       const finances = await ctx.db.finance.findMany({
         where: {
           createdById: ctx.session.user.id,
