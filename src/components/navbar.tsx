@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { ToggleTheme } from "./ui/toggle-theme";
-import { type Session } from "next-auth";
 import { UserDropdown } from "./user-dropdown";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -31,7 +30,7 @@ export function Navbar() {
     );
 }
 
-export function NavbarLoggedIn({ session }: { session: Session }) {
+export function NavbarLoggedIn() {
   const [isOpen, setIsOpen] = useState(false);
   const path = usePathname();
 
@@ -89,9 +88,7 @@ export function NavbarLoggedIn({ session }: { session: Session }) {
           </Link>
         </div>
         <div className="hidden md:flex md:items-center md:space-x-4">
-          <UserDropdown
-            user={user}
-          />
+          <UserDropdown user={user} />
           <ToggleTheme />
         </div>
       </div>
@@ -115,10 +112,7 @@ export function NavbarLoggedIn({ session }: { session: Session }) {
           >
             Einnahmen
           </Link>
-          <UserDropdown
-            username={session.user.name}
-            image={session.user.image}
-          />
+          <UserDropdown user={user} />
           <ToggleTheme />
         </div>
       )}

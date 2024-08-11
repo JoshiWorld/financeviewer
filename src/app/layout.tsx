@@ -49,7 +49,7 @@ export default async function RootLayout({
           >
             <HydrateClient>
               {session?.user ? (
-                <NavbarLoggedIn session={session} />
+                <NavbarLoggedIn />
               ) : (
                 <Navbar />
               )}
