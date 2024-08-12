@@ -107,10 +107,10 @@ export function NavbarLoggedIn() {
             Ausgaben
           </Link>
           <Link
-            href="/einnahmen"
-            className={`font-semibold ${path === "/einnahmen" ? "border-b-2 border-primary" : ""}`}
+            href="/tags"
+            className={`font-semibold ${path === "/tags" ? "border-b-2 border-primary" : ""}`}
           >
-            Einnahmen
+            Tags
           </Link>
           <UserDropdown user={user} />
           <ToggleTheme />
