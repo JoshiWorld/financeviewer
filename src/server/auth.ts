@@ -100,11 +100,10 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
   },
-  // pages: {
-  //   signIn: '/auth/login',
-  //   signOut: '/auth/logout',
-  //   error: '/auth/error',
-  // },
+  pages: {
+    signIn: '/login',
+    signOut: '/logout',
+  },
   adapter: PrismaAdapter(db) as Adapter,
   providers: [
     DiscordProvider({
