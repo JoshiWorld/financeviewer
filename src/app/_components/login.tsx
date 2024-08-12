@@ -40,9 +40,9 @@ export function LoginPage({
                     type="button"
                     className={
                       provider.id === "discord"
-                        ? "bg-blue-700 text-white"
+                        ? "bg-blue-700 text-white hover:bg-blue-700/80"
                         : provider.id === "google"
-                          ? "bg-white"
+                          ? "bg-white hover:bg-white/80"
                           : ""
                     }
                     onClick={() => signIn(provider.id)}
