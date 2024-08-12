@@ -9,7 +9,11 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { type BuiltInProviderType } from "next-auth/providers/index";
-import { type ClientSafeProvider, type LiteralUnion, signIn } from "next-auth/react";
+import {
+  type ClientSafeProvider,
+  type LiteralUnion,
+  signIn,
+} from "next-auth/react";
 
 export function LoginPage({
   providers,
@@ -24,9 +28,7 @@ export function LoginPage({
       <Card className="w-[350px]">
         <CardHeader>
           <CardTitle>Anmelden</CardTitle>
-          <CardDescription>
-            Hier kannst du dich anmelden
-          </CardDescription>
+          <CardDescription>Hier kannst du dich anmelden</CardDescription>
         </CardHeader>
         <CardContent>
           <form>
@@ -34,7 +36,19 @@ export function LoginPage({
               {/* @ts-expect-error || @ts-ignore */}
               {Object.values(providers).map((provider) => (
                 <div key={provider.name} className="flex flex-col space-y-1.5">
-                  <Button type="button" onClick={() => signIn(provider.id)}>{provider.name}</Button>
+                  <Button
+                    type="button"
+                    className={
+                      provider.id === "discord"
+                        ? "bg-blue-700 text-white"
+                        : provider.id === "google"
+                          ? "bg-white"
+                          : ""
+                    }
+                    onClick={() => signIn(provider.id)}
+                  >
+                    {provider.name}
+                  </Button>
                 </div>
               ))}
             </div>
