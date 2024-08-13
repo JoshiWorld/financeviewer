@@ -14,6 +14,10 @@ import {
   type LiteralUnion,
   signIn,
 } from "next-auth/react";
+import { SelectSeparator } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
 
 export function LoginPage({
   providers,
@@ -23,6 +27,13 @@ export function LoginPage({
     ClientSafeProvider
   > | null;
 }) {
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+
+  const handleCredentials = async () => {
+    await signIn("credentials", { email, password });
+  }
+
   return (
     <>
       <Card className="w-[350px]">
@@ -31,24 +42,59 @@ export function LoginPage({
           <CardDescription>Hier kannst du dich anmelden</CardDescription>
         </CardHeader>
         <CardContent>
+          <SelectSeparator />
+
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="email" className="text-right">
+                E-Mail
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                onChange={(event) => setEmail(event.target.value)}
+                value={email}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="password" className="text-right">
+                Passwort
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                onChange={(event) => setPassword(event.target.value)}
+                value={password}
+                className="col-span-3"
+              />
+            </div>
+            <div className="flex justify-center">
+              <Button type="button" onClick={handleCredentials}>Anmelden</Button>
+            </div>
+          </div>
+
+          <SelectSeparator className="mb-4" />
           <form>
             <div className="grid w-full items-center gap-4">
               {/* @ts-expect-error || @ts-ignore */}
               {Object.values(providers).map((provider) => (
                 <div key={provider.name} className="flex flex-col space-y-1.5">
-                  <Button
-                    type="button"
-                    className={
-                      provider.id === "discord"
-                        ? "bg-blue-700 text-white hover:bg-blue-700/80"
-                        : provider.id === "google"
-                          ? "bg-white hover:bg-white/80"
-                          : ""
-                    }
-                    onClick={() => signIn(provider.id)}
-                  >
-                    {provider.name}
-                  </Button>
+                  {provider.id !== "credentials" && (
+                    <Button
+                      type="button"
+                      className={
+                        provider.id === "discord"
+                          ? "bg-blue-700 text-white hover:bg-blue-700/80"
+                          : provider.id === "google"
+                            ? "bg-white hover:bg-white/80"
+                            : ""
+                      }
+                      onClick={() => signIn(provider.id)}
+                    >
+                      {provider.name}
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>

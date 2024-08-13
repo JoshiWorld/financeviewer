@@ -8,7 +8,7 @@ import {
 import { type Adapter } from "next-auth/adapters";
 import DiscordProvider from "next-auth/providers/discord";
 import GoogleProvider from "next-auth/providers/google";
-// import CredentialsProvider from "next-auth/providers/credentials";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
@@ -59,6 +59,9 @@ export const authOptions: NextAuthOptions = {
       },
     }),
     async signIn({ user, account }) {
+      console.log('SIGN IN CALLBACK');
+      console.log('USER', user);
+      console.log('ACCOUNT', account);
       if(!user.email) return false;
       if(!account) return false;
 
@@ -115,26 +118,29 @@ export const authOptions: NextAuthOptions = {
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
     }),
-    // CredentialsProvider({
-    //   name: "Credentials",
-    //   credentials: {
-    //     email: { label: "E-Mail", type: "text", placeholder: "max.mustermann@mail.de" },
-    //     password: { label: "Passwort", type: "password" }
-    //   },
-    //   async authorize(credentials, req) {
-    //     const user = await db.user.findUnique({
-    //       where: {
-    //         email: credentials?.email
-    //       }
-    //     });
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "E-Mail", type: "text", placeholder: "max.mustermann@mail.de" },
+        password: { label: "Passwort", type: "password" }
+      },
+      async authorize(credentials) {
+        const user = await db.user.findUnique({
+          where: {
+            email: credentials!.email
+          }
+        });
 
-    //     if(user) {
-    //       return user;
-    //     }
+        if(user) {
+          console.log('USER LOCATED');
+          return user;
+        }
 
-    //     return null;
-    //   }
-    // })
+        console.log("USER NOT FOUND");
+
+        return null;
+      }
+    })
     /**
      * ...add more providers here.
      *
